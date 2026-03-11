@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { api } from "../convex/_generated/api";
 import AppShell from "./components/layout/AppShell";
 import WeeklyView from "./views/WeeklyView";
-import MonthlyView from "./views/MonthlyView";
+import TrackerView from "./views/TrackerView";
 import AnalyticsView from "./views/AnalyticsView";
 import SettingsView from "./views/SettingsView";
 
@@ -25,7 +25,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/week" replace />} />
             <Route path="/week" element={<WeeklyView />} />
-            <Route path="/month" element={<MonthlyView />} />
+            <Route path="/tracker" element={<TrackerView />} />
+            <Route path="/month" element={<Navigate to="/tracker" replace />} />
             <Route path="/analytics" element={<AnalyticsView />} />
             <Route path="/settings" element={<SettingsView />} />
           </Routes>

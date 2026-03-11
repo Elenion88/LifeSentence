@@ -10,6 +10,15 @@
   --accent-ring: #3d6b4f;
   --text-primary: #e8ede9;
   --text-muted: #8fa99a;
+  --page-padding: 24px;
+  --bottom-nav-height: 0px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --page-padding: 16px;
+    --bottom-nav-height: 56px;
+  }
 }
 
 body {

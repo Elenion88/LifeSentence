@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "convex/react";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { api } from "../../../convex/_generated/api";
 import { subDays, format } from "date-fns";
 import { toDateStr } from "../../lib/dates";
@@ -14,6 +15,7 @@ const sectionTitle: React.CSSProperties = { margin: "0 0 12px", fontSize: 13, fo
 
 export default function AnalyticsView() {
   const today = new Date();
+  const isMobile = useIsMobile();
   const start30 = toDateStr(subDays(today, 30));
   const end = toDateStr(today);
 
@@ -66,14 +68,14 @@ export default function AnalyticsView() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Analytics — Last 30 Days</h2>
+      <h2 style={{ margin: 0, fontSize: isMobile ? 18 : 20, fontWeight: 700 }}>Analytics — Last 30 Days</h2>
 
       <div style={cardStyle}>
         <p style={sectionTitle}>Overall Completion Trend</p>
         <AreaTrendChart data={trendData} height={140} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
         <div style={cardStyle}>
           <p style={sectionTitle}>Avg % by Category</p>
           <ResponsiveContainer width="100%" height={220}>
@@ -92,10 +94,10 @@ export default function AnalyticsView() {
           <p style={sectionTitle}>Top Streaks</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {streakData.map((h) => (
-              <div key={h.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ flex: 1, fontSize: 12, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.name}</span>
-                <span style={{ fontSize: 11, color: "var(--text-muted)", minWidth: 50, textAlign: "right" }}>best: {h.longest}d</span>
-                <span style={{ fontSize: 12, fontWeight: 700, minWidth: 50, textAlign: "right", color: h.current > 0 ? getCategoryColor(h.category) : "var(--text-muted)" }}>
+              <div key={h.name} style={{ display: "flex", alignItems: "center", gap: 10, minHeight: isMobile ? 36 : "auto" }}>
+                <span style={{ flex: 1, fontSize: 13, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.name}</span>
+                <span style={{ fontSize: 12, color: "var(--text-muted)", minWidth: 50, textAlign: "right" }}>best: {h.longest}d</span>
+                <span style={{ fontSize: 13, fontWeight: 700, minWidth: 50, textAlign: "right", color: h.current > 0 ? getCategoryColor(h.category) : "var(--text-muted)" }}>
                   {h.current > 0 ? `🔥 ${h.current}d` : "—"}
                 </span>
               </div>
@@ -105,7 +107,7 @@ export default function AnalyticsView() {
         </div>
       </div>
 
-      <div style={cardStyle}>
+      <div style={{ ...cardStyle, marginBottom: isMobile ? 8 : 0 }}>
         <p style={sectionTitle}>Mood & Motivation Trends</p>
         <MoodChart data={moodChartData} height={160} />
       </div>

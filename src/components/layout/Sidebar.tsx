@@ -3,7 +3,7 @@ import { Calendar, BarChart2, Sun, Settings, Leaf } from "lucide-react";
 
 const nav = [
   { to: "/week", icon: Sun, label: "Today" },
-  { to: "/month", icon: Calendar, label: "Monthly" },
+  { to: "/tracker", icon: Calendar, label: "Tracker" },
   { to: "/analytics", icon: BarChart2, label: "Analytics" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
