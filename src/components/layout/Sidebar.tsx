@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom";
-import { Calendar, BarChart2, CalendarDays, Settings, Leaf } from "lucide-react";
+import { Calendar, BarChart2, Sun, Settings, Leaf } from "lucide-react";
 
 const nav = [
-  { to: "/week", icon: CalendarDays, label: "Weekly" },
+  { to: "/week", icon: Sun, label: "Today" },
   { to: "/month", icon: Calendar, label: "Monthly" },
   { to: "/analytics", icon: BarChart2, label: "Analytics" },
   { to: "/settings", icon: Settings, label: "Settings" },
