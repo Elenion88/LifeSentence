@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { toDateStr } from "../../lib/dates";
@@ -5,20 +6,37 @@ import { buildCompletionMap } from "../../lib/stats";
 import DonutChart from "../../components/charts/DonutChart";
 import TaskList from "../../components/tasks/TaskList";
 import MoodEntry from "../../components/mood/MoodEntry";
-import { format } from "date-fns";
+import { format, subDays, addDays, parseISO } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CheckSquare, Square } from "lucide-react";
 import { Id } from "../../../convex/_generated/dataModel";
 
+const navBtn: React.CSSProperties = {
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
+  borderRadius: 8,
+  width: 36,
+  height: 36,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  color: "var(--text-primary)",
+  flexShrink: 0,
+};
+
 export default function TodayView() {
-  const today = toDateStr(new Date());
-  const now = new Date();
+  const todayStr = toDateStr(new Date());
+  const [dateStr, setDateStr] = useState(todayStr);
+  const isToday = dateStr === todayStr;
+  const date = parseISO(dateStr);
 
   const habits = useQuery(api.habits.getActive);
   const completions = useQuery(api.completions.getForDateRange, {
-    startDate: today,
-    endDate: today,
+    startDate: dateStr,
+    endDate: dateStr,
   });
-  const tasks = useQuery(api.tasks.getForDate, { date: today }) as
+  const tasks = useQuery(api.tasks.getForDate, { date: dateStr }) as
     | Array<{ _id: Id<"tasks">; title: string; isRecurring: boolean; completed: boolean; completedForDate: boolean }>
     | undefined;
 
@@ -28,30 +46,54 @@ export default function TodayView() {
   const allHabits = habits ?? [];
   const allTasks = tasks ?? [];
 
-  // Combined percent: (completed habits + completed tasks) / (total habits + total tasks)
-  const completedHabits = allHabits.filter((h) => completionMap[today]?.[h._id]).length;
+  const completedHabits = allHabits.filter((h) => completionMap[dateStr]?.[h._id]).length;
   const completedTasks = allTasks.filter((t) => t.completedForDate).length;
   const total = allHabits.length + allTasks.length;
   const completed = completedHabits + completedTasks;
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  const dateLabel = format(now, "EEEE, MMMM d");
-
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
-      {/* Date header */}
-      <div style={{ textAlign: "center" }}>
-        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>
-          {dateLabel}
-        </h2>
-        <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--text-muted)" }}>
-          {completed} of {total} completed
-        </p>
+      {/* Date nav */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button style={navBtn} onClick={() => setDateStr(toDateStr(subDays(date, 1)))}>
+          <ChevronLeft size={18} />
+        </button>
+        <div style={{ flex: 1, textAlign: "center" }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "var(--text-primary)" }}>
+            {isToday ? "Today" : format(date, "EEEE")}
+          </h2>
+          <p style={{ margin: "2px 0 0", fontSize: 13, color: isToday ? "var(--accent)" : "var(--text-muted)" }}>
+            {format(date, "MMMM d, yyyy")}
+          </p>
+        </div>
+        <button
+          style={{ ...navBtn, opacity: isToday ? 0.3 : 1, cursor: isToday ? "default" : "pointer" }}
+          onClick={() => !isToday && setDateStr(toDateStr(addDays(date, 1)))}
+          disabled={isToday}
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
 
-      {/* Big progress ring */}
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      {/* Jump to today */}
+      {!isToday && (
+        <div style={{ textAlign: "center" }}>
+          <button
+            onClick={() => setDateStr(todayStr)}
+            style={{ background: "var(--surface)", border: "1px solid var(--accent)", borderRadius: 8, padding: "6px 16px", color: "var(--accent)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+          >
+            Back to Today
+          </button>
+        </div>
+      )}
+
+      {/* Progress ring */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
         <DonutChart percent={percent} size={200} thickness={18} />
+        <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
+          {completed} of {total} completed
+        </p>
       </div>
 
       {/* Habits */}
@@ -63,11 +105,11 @@ export default function TodayView() {
         </div>
         <div style={{ maxHeight: 320, overflowY: "auto" }}>
           {allHabits.map((habit) => {
-            const done = completionMap[today]?.[habit._id] ?? false;
+            const done = completionMap[dateStr]?.[habit._id] ?? false;
             return (
               <button
                 key={habit._id}
-                onClick={() => toggleHabit({ habitId: habit._id as Id<"habits">, date: today, completed: !done })}
+                onClick={() => toggleHabit({ habitId: habit._id as Id<"habits">, date: dateStr, completed: !done })}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -99,12 +141,12 @@ export default function TodayView() {
 
       {/* Tasks */}
       <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)", padding: 16 }}>
-        <TaskList date={today} />
+        <TaskList date={dateStr} />
       </div>
 
       {/* Mood */}
       <div style={{ background: "var(--surface)", borderRadius: 12, border: "1px solid var(--border)", padding: 16 }}>
-        <MoodEntry date={today} />
+        <MoodEntry date={dateStr} />
       </div>
     </div>
   );
