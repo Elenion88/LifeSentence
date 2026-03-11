@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Plus, Trash2, ToggleLeft, ToggleRight, RefreshCw } from "lucide-react";
+import { Plus, Trash2, RefreshCw } from "lucide-react";
+import Toggle from "../../components/ui/Toggle";
 import { CATEGORIES } from "../../constants/categories";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -115,13 +116,10 @@ export default function SettingsView() {
                     <span style={{ flex: 1, fontSize: 14, color: habit.isActive ? "var(--text-primary)" : "var(--text-muted)", textDecoration: habit.isActive ? "none" : "line-through" }}>
                       {habit.name}
                     </span>
-                    <button
-                      onClick={() => updateHabit({ id: habit._id as Id<"habits">, isActive: !habit.isActive })}
-                      style={{ background: "none", border: "none", cursor: "pointer", color: habit.isActive ? "var(--accent)" : "var(--text-muted)", padding: "0 6px", minHeight: 44, display: "flex", alignItems: "center", touchAction: "manipulation" }}
-                      title={habit.isActive ? "Deactivate" : "Activate"}
-                    >
-                      {habit.isActive ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
-                    </button>
+                    <Toggle
+                      checked={habit.isActive}
+                      onChange={() => updateHabit({ id: habit._id as Id<"habits">, isActive: !habit.isActive })}
+                    />
                     <button
                       onClick={() => removeHabit({ id: habit._id as Id<"habits"> })}
                       style={{ background: "none", border: "none", cursor: "pointer", color: "var(--border)", padding: "0 4px", minHeight: 44, display: "flex", alignItems: "center", touchAction: "manipulation" }}
